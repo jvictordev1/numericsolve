@@ -32,7 +32,7 @@ export default function Navbar() {
   ];
   return (
     <>
-      <NavigationMenu className="fixed min-w-full justify-between px-4 sm:px-10 py-4">
+      <NavigationMenu className="fixed min-w-full justify-between px-4 sm:px-10 py-4 bg-zinc-100 border-b-2">
         <h1 className="text-xl">NumericSolve</h1>
         <NavigationMenuList>
           <DropdownMenu>
