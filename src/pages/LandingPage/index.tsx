@@ -32,19 +32,19 @@ export default function LandingPage() {
   return (
     <>
       <Navbar />
-      <section className="flex flex-col gap-20 items-center h-dvh pt-32">
-        <h1 className="text-5xl max-w-3xl text-center text-neutral-900">
+      <section className="flex flex-col gap-12 items-center pt-24 px-4 md:gap-20 md:pt-32">
+        <h1 className="text-4xl max-w-3xl text-center text-neutral-900 md:w-2xl md:text-5xl">
           Seu Caminho Rápido para{" "}
           <span className="font-semibold">Soluções Numéricas</span>.
         </h1>
-        <ul className="flex gap-12">
+        <ul className="flex flex-wrap items-center justify-center gap-12 mb-4">
           {cardsContent.map((c) => {
             return (
-              <li className="h-64 w-52">
+              <li className="h-64 w-44 md:w-52">
                 <div className="flex items-center justify-center w-full h-1/2 bg-blue-600 rounded-sm mb-6">
                   {c.icon}
                 </div>
-                <div className="flex flex-col text-center gap-4">
+                <div className="flex flex-col text-center gap-1">
                   <h1 className="text-xl font-semibold text-neutral-900">
                     {c.title}
                   </h1>
