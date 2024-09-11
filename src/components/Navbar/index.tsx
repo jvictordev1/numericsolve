@@ -20,6 +20,16 @@ import { IoMenu } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
 export default function Navbar() {
+  const dropdownMenuItems: { title: string; href: string }[] = [
+    {
+      title: "Equações",
+      href: "/equations",
+    },
+    {
+      title: "Documentação",
+      href: "/docs",
+    },
+  ];
   return (
     <>
       <NavigationMenu className="fixed min-w-full justify-between px-4 sm:px-10 py-4">
@@ -30,13 +40,14 @@ export default function Navbar() {
               <IoMenu className="text-2xl" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>
-                <Link to="/equations">Equações</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link to="/docs">Documentação</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              {dropdownMenuItems.map((i) => {
+                return (
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link to={i.href}>{i.title}</Link>
+                  </DropdownMenuItem>
+                );
+              })}
+              <DropdownMenuItem className="cursor-pointer">
                 <a
                   href="https://github.com/jvictordev1/numericsolve"
                   target="__blank"
