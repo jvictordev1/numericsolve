@@ -1,4 +1,3 @@
-import Navbar from "@/components/Navbar";
 import React from "react";
 import { CiTextAlignLeft } from "react-icons/ci";
 import { FaChartArea } from "react-icons/fa";
@@ -31,8 +30,7 @@ export default function LandingPage() {
   ];
   return (
     <>
-      <Navbar />
-      <section className="flex flex-col gap-12 items-center pt-24 px-4 md:gap-20 md:pt-32">
+      <section className="flex flex-col gap-12 items-center px-4 md:gap-20">
         <h1 className="text-4xl max-w-3xl text-center text-neutral-900 md:w-2xl md:text-5xl">
           Seu Caminho Rápido para{" "}
           <span className="font-semibold">Soluções Numéricas</span>.
