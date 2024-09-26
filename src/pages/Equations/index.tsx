@@ -1,3 +1,6 @@
+import numericSolveApi from "@/api/numericSolveApi";
+import { BissectionMethodResponse } from "@/common";
+import BissectionMethod from "@/components/BissectionMethod";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,12 +14,50 @@ import { useState } from "react";
 export default function Equations() {
   const [equation, setEquation] = useState("");
   const [tolerance, setTolerance] = useState(0);
-  const [selectedMethod, setSelectedMethod] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState("bisseccao");
+  const [derivative, setDerivative] = useState("");
   const [firstIntervalNumber, setFirstIntervalNumber] = useState(0);
   const [secondIntervalNumber, setSecondIntervalNumber] = useState(0);
+  const [iterations, setIterations] = useState(0);
+  const [result, setResult] = useState<BissectionMethodResponse | null>(null);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    let data;
+    if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
+      data = {
+        funcao: equation,
+        intervalo: [firstIntervalNumber, secondIntervalNumber],
+        tolerancia: tolerance,
+        maxIteracao: iterations,
+      };
+    } else {
+      if (selectedMethod === "newtonRaphson") {
+        data = {
+          funcao: equation,
+          derivada: derivative,
+          chuteInicial: firstIntervalNumber,
+          tolerancia: tolerance,
+          maxIteracao: iterations,
+        };
+      } else {
+        data = {
+          funcao: equation,
+          x0: firstIntervalNumber,
+          x1: secondIntervalNumber,
+          tolerancia: tolerance,
+          maxIteracao: iterations,
+        };
+      }
+    }
+    numericSolveApi
+      .post(`/${selectedMethod}`, data)
+      .then((res) => {
+        setResult(res.data.resultado.resultado);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   return (
@@ -56,14 +97,13 @@ export default function Equations() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="bisseccao">Bissecção</SelectItem>
-              <SelectItem value="falsaPosicao">Falsa Posição</SelectItem>
-              <SelectItem value="newton">Newton-Raphson</SelectItem>
+              <SelectItem value="fp">Falsa Posição</SelectItem>
+              <SelectItem value="newtonRaphson">Newton-Raphson</SelectItem>
               <SelectItem value="secante">Secante</SelectItem>
             </SelectContent>
           </Select>
-          <div className="flex flex-col gap-2">
-            {selectedMethod === "bisseccao" ||
-            selectedMethod === "falsaPosicao" ? (
+          <div className="flex flex-col gap-2 mb-2">
+            {selectedMethod === "bisseccao" || selectedMethod === "fp" ? (
               <>
                 <h3 className="text-xl">Intervalo</h3>
                 <div className="flex flex-col items-center w-full gap-2">
@@ -92,8 +132,17 @@ export default function Equations() {
                   />
                 </div>
               </>
-            ) : selectedMethod === "newton" ? (
+            ) : selectedMethod === "newtonRaphson" ? (
               <>
+                <Input
+                  required
+                  type="text"
+                  name="derivative"
+                  id="derivative"
+                  onChange={(e) => setDerivative(e.target.value)}
+                  placeholder="Derivada: 2x + 3"
+                  className="border-2 border-zinc-300 focus:border-zinc-900"
+                />
                 <h3 className="text-xl">Valor Inicial</h3>
                 <Input
                   required
@@ -137,6 +186,17 @@ export default function Equations() {
               </>
             )}
           </div>
+          <Input
+            required
+            type="number"
+            name="iterations"
+            id="iterations"
+            onChange={(e) => setIterations(Number(e.target.value))}
+            min="10"
+            max="1000"
+            placeholder="Máximo de iterações"
+            className="border-2 border-zinc-300 focus:border-zinc-900"
+          />
           <button
             className="bg-green-500 rounded-md text-zinc-100 text-xl py-2"
             type="submit"
@@ -144,6 +204,15 @@ export default function Equations() {
             Resolver!
           </button>
         </form>
+        {result && (
+          <BissectionMethod
+            intervaloAtual={result.passos[0].intervaloAtual}
+            erro={result.erro}
+            iteracao={result.passos[0].iteracao}
+            pontoMedio={result.passos[0].pontoMedio}
+            valorFuncao={result.passos[0].valorFuncao}
+          />
+        )}
       </section>
     </>
   );
