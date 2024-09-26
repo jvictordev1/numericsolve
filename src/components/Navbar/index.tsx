@@ -44,7 +44,7 @@ export default function Navbar() {
             <DropdownMenuContent>
               {dropdownMenuItems.map((i) => {
                 return (
-                  <DropdownMenuItem className="cursor-pointer">
+                  <DropdownMenuItem className="cursor-pointer" key={i.href}>
                     <Link to={i.href}>{i.title}</Link>
                   </DropdownMenuItem>
                 );
