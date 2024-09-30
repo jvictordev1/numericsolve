@@ -26,8 +26,8 @@ export default function Navbar() {
       href: "/equations",
     },
     {
-      title: "Documentação",
-      href: "/docs",
+      title: "Documentação da API",
+      href: "https://api-calculonumerico.onrender.com/docs/#/",
     },
   ];
   return (
@@ -45,14 +45,19 @@ export default function Navbar() {
               {dropdownMenuItems.map((i) => {
                 return (
                   <DropdownMenuItem className="cursor-pointer" key={i.href}>
-                    <Link to={i.href}>{i.title}</Link>
+                    <Link
+                      to={i.href}
+                      target={i.href === "/equations" ? "" : "_blank"}
+                    >
+                      {i.title}
+                    </Link>
                   </DropdownMenuItem>
                 );
               })}
               <DropdownMenuItem className="cursor-pointer">
                 <a
                   href="https://github.com/jvictordev1/numericsolve"
-                  target="__blank"
+                  target="_blank"
                 >
                   Github
                 </a>
@@ -71,21 +76,22 @@ export default function Navbar() {
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link to="/docs">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Documentação
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
+                href="https://api-calculonumerico.onrender.com/docs/#/"
+                target="_blank"
+              >
+                Documentação da API
+              </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <a
+              <NavigationMenuLink
+                className={navigationMenuTriggerStyle()}
                 href="https://github.com/jvictordev1/numericsolve"
-                target="__blank"
+                target="_blank"
               >
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Github
-                </NavigationMenuLink>
-              </a>
+                Github
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </div>
         </NavigationMenuList>

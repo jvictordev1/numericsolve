@@ -16,15 +16,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CircleX } from "lucide-react";
+import { Bot, CircleX } from "lucide-react";
 import { useState } from "react";
 import { InlineMath } from "react-katex";
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export default function Equations() {
   const [equation, setEquation] = useState("");
   const [tolerance, setTolerance] = useState(0);
   const [selectedMethod, setSelectedMethod] = useState("bisseccao");
-  const [derivative, setDerivative] = useState("");
   const [firstIntervalNumber, setFirstIntervalNumber] = useState(0);
   const [secondIntervalNumber, setSecondIntervalNumber] = useState(0);
   const [iterations, setIterations] = useState(0);
@@ -37,35 +46,41 @@ export default function Equations() {
     | null
   >(null);
   const [isLoaderOn, setIsLoaderOn] = useState(false);
+  const [methodData, setMethodData] = useState("");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoaderOn(true);
+    const template = {
+      funcao: equation,
+      tolerancia: tolerance,
+      maxIteracao: iterations,
+    };
     let data;
     if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
       data = {
-        funcao: equation,
+        ...template,
         intervalo: [firstIntervalNumber, secondIntervalNumber],
-        tolerancia: tolerance,
-        maxIteracao: iterations,
       };
+      if (selectedMethod === "bisseccao") {
+        setMethodData("pontoMedio");
+      } else {
+        setMethodData("pontoFalsaPosicao");
+      }
     } else {
       if (selectedMethod === "newtonRaphson") {
         data = {
-          funcao: equation,
-          derivada: derivative,
+          ...template,
           chuteInicial: firstIntervalNumber,
-          tolerancia: tolerance,
-          maxIteracao: iterations,
         };
+        setMethodData("xAtual");
       } else {
         data = {
-          funcao: equation,
+          ...template,
           x0: firstIntervalNumber,
           x1: secondIntervalNumber,
-          tolerancia: tolerance,
-          maxIteracao: iterations,
         };
+        setMethodData("xCurr");
       }
     }
     numericSolveApi
@@ -76,10 +91,14 @@ export default function Equations() {
           setResult(r);
           return;
         }
+        if (selectedMethod === "secante") {
+          setResult(r);
+          return;
+        }
         setResult(r.resultado);
       })
       .catch((err) => {
-        console.log(err);
+        setResult(err.response.data);
       })
       .finally(() => {
         setIsLoaderOn(false);
@@ -119,7 +138,7 @@ export default function Equations() {
               onChange={(e) => setTolerance(Number(e.target.value))}
               min="0"
               max="1"
-              step="0.001"
+              step="0.000001"
               placeholder="Tolerância"
               className="border-2 border-zinc-300 focus:border-zinc-900"
               disabled={result ? true : false}
@@ -174,23 +193,13 @@ export default function Equations() {
                 </>
               ) : selectedMethod === "newtonRaphson" ? (
                 <>
-                  <Input
-                    required
-                    type="text"
-                    name="derivative"
-                    id="derivative"
-                    onChange={(e) => setDerivative(e.target.value)}
-                    value={derivative}
-                    placeholder="Derivada: 2x + 3"
-                    className="border-2 border-zinc-300 focus:border-zinc-900"
-                    disabled={result ? true : false}
-                  />
                   <h3 className="text-xl">Valor Inicial</h3>
                   <Input
                     required
                     type="number"
                     name="first-interval-number"
                     id="first-interval-number"
+                    step="0.001"
                     onChange={(e) =>
                       setFirstIntervalNumber(Number(e.target.value))
                     }
@@ -254,28 +263,54 @@ export default function Equations() {
             </button>
           </form>
           {result && (
-            <section className="flex flex-col border p-4 rounded-sm w-4/5 gap-4 sm:w-[600px] md:w-[700px] lg:w-[800px]">
+            <section className="flex flex-col border p-4 rounded-sm w-full gap-4 sm:w-[600px] md:w-[700px] lg:w-[800px]">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl">Resultado</h1>
-                <button type="button">
-                  <CircleX
-                    className="text-red-500 text-2xl"
-                    onClick={() => setResult(null)}
-                  />
-                </button>
+                <div className="flex gap-2 items-center" title="Dúvidas?">
+                  <button type="button">
+                    <Bot className="text-blue-500 text-2xl" />
+                  </button>
+                  <button type="button" title="Apagar resultado">
+                    <CircleX
+                      className="text-red-500 text-2xl"
+                      onClick={() => setResult(null)}
+                    />
+                  </button>
+                </div>
               </div>
+
               {"error" in result ? (
                 <h2>Erro: {result.error}</h2>
               ) : (
                 <>
-                  <h2>
-                    <InlineMath math={equation} /> com Erro ={" "}
-                    <InlineMath math={String(tolerance)} />
-                  </h2>
+                  <div>
+                    <p>
+                      Calcular <InlineMath math={equation} /> com Erro ={" "}
+                      <InlineMath math={String(tolerance)} /> e{" "}
+                      {selectedMethod === "bisseccao" ||
+                      selectedMethod === "fp" ? (
+                        <InlineMath
+                          math={`Intervalo [${firstIntervalNumber}, ${secondIntervalNumber}]`}
+                        />
+                      ) : selectedMethod === "newtonRaphson" ? (
+                        <InlineMath math={`x0 = ${firstIntervalNumber}`} />
+                      ) : (
+                        <InlineMath
+                          math={`[x0 = ${firstIntervalNumber};x1 = ${secondIntervalNumber}]`}
+                        />
+                      )}
+                      .
+                    </p>
+                    {"derivada" in result ? (
+                      <p>
+                        Derivada: <InlineMath math={result.derivada} />
+                      </p>
+                    ) : null}
+                  </div>
                   <p>
                     Função
                     {result.convergiu ? " convergiu" : " não convergiu"} com
-                    erro de {result.erro.toFixed(4)} através de{" "}
+                    erro de {result.erro.toFixed(6)} através de{" "}
                     {result.iteracoes} iterações, com raiz ={" "}
                     {result.raiz.toFixed(4)}.
                   </p>
@@ -284,6 +319,46 @@ export default function Equations() {
                     method={selectedMethod}
                     steps={result.passos}
                   />
+                  <h4 className="text-xl font-medium">
+                    Comportamento do método
+                  </h4>
+                  <section className="w-full h-72">
+                    <ResponsiveContainer width="100%" height="80%">
+                      <LineChart
+                        data={result.passos}
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 20,
+                          bottom: 5,
+                        }}
+                        className="-ml-4"
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey={methodData} />
+                        <YAxis
+                          dataKey={
+                            selectedMethod === "secante"
+                              ? "fXCurr"
+                              : "valorFuncao"
+                          }
+                        />
+                        <Tooltip />
+                        <Legend />
+                        <Line
+                          type="monotone"
+                          dataKey={
+                            selectedMethod === "secante"
+                              ? "fXCurr"
+                              : "valorFuncao"
+                          }
+                          stroke="#8884d8"
+                          activeDot={{ r: 8 }}
+                          name="Valor de f(x)"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </section>
                 </>
               )}
             </section>

@@ -38,7 +38,7 @@ export default function LandingPage() {
         <ul className="flex flex-wrap items-center justify-center gap-12 mb-4">
           {cardsContent.map((c) => {
             return (
-              <li className="h-64 w-44 md:w-52">
+              <li key={c.title} className="h-64 w-44 md:w-52">
                 <div className="flex items-center justify-center w-full h-1/2 bg-blue-600 rounded-sm mb-6">
                   {c.icon}
                 </div>

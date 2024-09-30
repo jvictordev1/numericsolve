@@ -23,6 +23,7 @@ export interface NewtonRaphsonResponse {
   convergiu: boolean;
   erro: number;
   motivoParada: string;
+  derivada: string;
   passos: NewtonRaphsonStep[];
 }
 export interface SecantMethodResponse {
@@ -65,12 +66,13 @@ export interface NewtonRaphsonStep {
   erro: number;
 }
 export interface SecanteMethodStep {
-  iteracao: number;
-  x0: number;
-  x1: number;
-  xNovo: number;
-  valorFuncao: number;
   erro: number;
+  fXCurr: number;
+  fXPrev: number;
+  iteracao: number;
+  xCurr: number;
+  xNext: number;
+  xPrev: number;
 }
 export interface ErrorResponse {
   error: string;
