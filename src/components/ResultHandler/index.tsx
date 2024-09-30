@@ -15,7 +15,6 @@ interface ResultHandlerProps {
     | SecanteMethodStep[];
 }
 export default function ResultHandler({ method, steps }: ResultHandlerProps) {
-  console.log(steps);
   function renderSelectedMethodCard(
     method: string,
     step:
