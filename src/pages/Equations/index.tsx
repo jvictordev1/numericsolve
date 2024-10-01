@@ -134,6 +134,20 @@ export default function Equations() {
         setIsLoaderOn(false);
       });
   }
+  function handleContinueSolution(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    numericSolveApi
+      .post("/continuarSolucao", {
+        metodoEscolhido: "newtonRaphson",
+        novasIteracoes: 1,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
   return (
     <>
@@ -299,7 +313,7 @@ export default function Equations() {
                         <AccordionContent className="flex justify-center bg-zinc-100">
                           <form
                             className="flex flex-col w-full gap-4"
-                            onSubmit={(e) => handleSubmit(e)}
+                            onSubmit={(e) => handleContinueSolution(e)}
                           >
                             <Select
                               onValueChange={(val) => setSecondMethod(val)}
