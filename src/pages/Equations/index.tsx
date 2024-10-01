@@ -113,9 +113,10 @@ export default function Equations() {
           return;
         }
         if (selectedMethod === "secante") {
-          setResult(r);
-          setLastStepFirstNumber(steps[steps.length - 1].xPrev);
-          setLastStepSecondNumber(steps[steps.length - 1].xCurr);
+          console.log(r);
+          // setResult(r);
+          // setLastStepFirstNumber(steps[steps.length - 1].xPrev);
+          // setLastStepSecondNumber(steps[steps.length - 1].xCurr);
           return;
         } else {
           if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
