@@ -33,6 +33,7 @@ export default function MethodsInterval({
               }}
               value={firstIntervalNumber}
               placeholder="1"
+              step="0.001"
               className="border-2 border-zinc-300 focus:border-zinc-900"
               disabled={result}
             />
@@ -45,6 +46,7 @@ export default function MethodsInterval({
               onChange={(e) => setSecondIntervalNumber(Number(e.target.value))}
               value={secondIntervalNumber}
               placeholder="2"
+              step="0.001"
               className="border-2 border-zinc-300 focus:border-zinc-900"
               disabled={result}
             />

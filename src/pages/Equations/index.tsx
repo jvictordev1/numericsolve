@@ -284,8 +284,8 @@ export default function Equations() {
                     Função
                     {result.convergiu ? " convergiu" : " não convergiu"} com
                     erro de {result.erro.toFixed(6)} através de{" "}
-                    {result.iteracoes} iterações, com raiz ={" "}
-                    {result.raiz.toFixed(4)}.
+                    {result.iteracoes} iterações, com{" "}
+                    {result.raiz ? `raiz de ${result.raiz.toFixed(4)}` : ""}.
                   </p>
                   <hr />
                   <ResultHandler
