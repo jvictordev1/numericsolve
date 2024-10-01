@@ -107,29 +107,29 @@ export default function Equations() {
       .post(`/${selectedMethod}`, data)
       .then((res) => {
         const r = res.data.resultado;
-        const steps = r.resultado.passos;
+        // const steps = r.resultado.passos;
         if ("error" in r) {
           setResult(r);
           return;
         }
         if (selectedMethod === "secante") {
-          console.log(r);
-          // setResult(r);
+          setResult(r);
           // setLastStepFirstNumber(steps[steps.length - 1].xPrev);
           // setLastStepSecondNumber(steps[steps.length - 1].xCurr);
           return;
-        } else {
-          if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
-            setLastStepFirstNumber(steps[steps.length - 1].intervaloAtual.a);
-            setLastStepSecondNumber(steps[steps.length - 1].intervaloAtual.b);
-          } else {
-            setLastStepFirstNumber(steps[steps.length - 1].xAtual);
-          }
-        }
+        } //else {
+        //   if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
+        //     setLastStepFirstNumber(steps[steps.length - 1].intervaloAtual.a);
+        //     setLastStepSecondNumber(steps[steps.length - 1].intervaloAtual.b);
+        //   } else {
+        //     setLastStepFirstNumber(steps[steps.length - 1].xAtual);
+        //   }
+        // }
         setResult(r.resultado);
       })
       .catch((err) => {
-        setResult(err.response.data);
+        console.log(err);
+        // setResult(err.response.data);
       })
       .finally(() => {
         setIsLoaderOn(false);
@@ -288,7 +288,7 @@ export default function Equations() {
                     {result.iteracoes} iterações
                     {result.convergiu
                       ? ` , com raiz =${result.raiz.toFixed(4)}`
-                      : "."}
+                      : ""}
                     .
                   </p>
                   <hr />
