@@ -6,41 +6,31 @@ Numeric Solve
 
 ## Descrição do projeto.
 
-Esse projeto consiste num sistema web para lista de tarefas, onde os usuários podem registrar, editar, concluir e apagar suas tarefas.
+Esse projeto consiste num sistema web que pode ser utilizado para obter soluções numéricas para equações lineares através dos métodos da Bissecção, Falsa Posição, Newton-Raphson e Secante.
 
 ## Instruções de como executar a aplicação
 
-Siga o passo a passo descrito abaixo no seu terminal. **A aplicação só funcionará corretamente se você executar a interface e o json-server.**
-
-### Interface
+Siga o passo a passo descrito abaixo no seu terminal.
 
 ```bash
-  git clone https://github.com/jvictordev1/angular-todo.git
-  cd angular-todo
+  git clone https://github.com/jvictordev1/numericsolve.git
+  cd numericsolve
   npm i
-  npm start
+  npm run dev
 ```
 
-### Json server
-
-Na mesma pasta da aplicação, execute:
-
-```bash
-  json-server --watch db.json
-```
-
-Acesse a página _http://localhost:4200_ para utilizar a aplicação.
+Acesse a página _http://localhost:5173_ para utilizar a aplicação.
 
 ## Tecnologias utilizadas
 
 - Typescript
 - HTML
 - CSS
-- Angular
+- React
+- Tailwind
+- Vite
 
 ## Possíveis melhorias futuras.
 
-- [ ] Adicionar sistema de login para usuários
-- [ ] Adicionar lembretes para conclusão de tarefas
-- [ ] Adicionar possibilidade de integração de imagens às tarefas
-- [ ] Adicionar prioridades às tarefas
+- [ ] Adicionar integração com chat de dúvidas
+- [ ] Adicionar possibilidade de intercalação de métodos
