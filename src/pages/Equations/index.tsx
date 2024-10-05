@@ -128,8 +128,7 @@ export default function Equations() {
         setResult(r.resultado);
       })
       .catch((err) => {
-        console.log(err);
-        // setResult(err.response.data);
+        setResult(err.response.data);
       })
       .finally(() => {
         setIsLoaderOn(false);
