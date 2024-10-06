@@ -7,9 +7,9 @@ import {
   SecantMethodResponse,
 } from "@/common";
 import Chart from "@/components/Chart";
+import IterationsHandler from "@/components/IterationsHandler";
 import Loader from "@/components/Loader";
 import MethodsInterval from "@/components/MethodsInterval";
-import ResultHandler from "@/components/ResultHandler";
 import {
   Accordion,
   AccordionContent,
@@ -250,9 +250,10 @@ export default function Equations() {
                   </button>
                 </div>
               </div>
-
               {"error" in result ? (
-                <h2>Erro: {result.error}</h2>
+                <h2 className="font-semibold text-red-500">
+                  Erro: {result.error}
+                </h2>
               ) : (
                 <>
                   <div>
@@ -265,10 +266,10 @@ export default function Equations() {
                           math={`Intervalo [${firstIntervalNumber}, ${secondIntervalNumber}]`}
                         />
                       ) : selectedMethod === "newtonRaphson" ? (
-                        <InlineMath math={`x0 = ${firstIntervalNumber}`} />
+                        <InlineMath math={`x_0 = ${firstIntervalNumber}`} />
                       ) : (
                         <InlineMath
-                          math={`[x0 = ${firstIntervalNumber};x1 = ${secondIntervalNumber}]`}
+                          math={`[x_0 = ${firstIntervalNumber};x_1 = ${secondIntervalNumber}]`}
                         />
                       )}{" "}
                       Utilizando o método da{" "}
@@ -283,18 +284,31 @@ export default function Equations() {
                   <p>
                     Função
                     {result.convergiu ? " convergiu" : " não convergiu"} com
-                    erro de {result.erro.toFixed(6)} através de{" "}
-                    {result.iteracoes} iterações
-                    {result.convergiu
-                      ? ` , com raiz =${result.raiz.toFixed(4)}`
-                      : ""}
+                    erro de{" "}
+                    <InlineMath
+                      math={`\\epsilon = ${result.erro.toFixed(6)}`}
+                    />{" "}
+                    através de <InlineMath math={`${result.iteracoes}`} />{" "}
+                    iterações
+                    {result.convergiu ? (
+                      <span>
+                        , com raiz{" "}
+                        <InlineMath
+                          math={`\\overline{x} = ${result.raiz.toFixed(6)}`}
+                        />
+                      </span>
+                    ) : (
+                      ""
+                    )}
                     .
                   </p>
                   <hr />
-                  <ResultHandler
-                    method={selectedMethod}
-                    steps={result.passos}
-                  />
+                  <section>
+                    <IterationsHandler
+                      method={selectedMethod}
+                      steps={result.passos}
+                    />
+                  </section>
                   <h4 className="text-xl font-medium">
                     Comportamento do método
                   </h4>

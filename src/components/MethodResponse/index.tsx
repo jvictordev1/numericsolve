@@ -15,11 +15,13 @@ export default function MethodResponse({
   iteracao,
 }: MethodResponse) {
   return (
-    <div>
+    <div className="w-full">
       <h4 className="text-xl font-medium">Iteração {iteracao}</h4>
-      <BlockMath>{formulaPonto}</BlockMath>
-      <BlockMath>{formulaValorFuncao}</BlockMath>
-      <BlockMath>{formulaErro}</BlockMath>
+      <div className="overflow-scroll">
+        <BlockMath>{formulaPonto}</BlockMath>
+        <BlockMath>{formulaValorFuncao}</BlockMath>
+        <BlockMath>{formulaErro}</BlockMath>
+      </div>
     </div>
   );
 }
