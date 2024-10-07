@@ -6,6 +6,7 @@ export interface BissectionMethodResponse {
   erro: number;
   motivoParada: string;
   passos: BissectionMethodStep[];
+  metodo: string;
 }
 export interface FalsePositionMethodResponse {
   raiz: number;
@@ -15,6 +16,7 @@ export interface FalsePositionMethodResponse {
   erro: number;
   motivoParada: string;
   passos: FalsePositionMethodStep[];
+  metodo: string;
 }
 export interface NewtonRaphsonResponse {
   raiz: number;
@@ -25,6 +27,7 @@ export interface NewtonRaphsonResponse {
   motivoParada: string;
   derivada: string;
   passos: NewtonRaphsonStep[];
+  metodo: string;
 }
 export interface SecantMethodResponse {
   raiz: number;
@@ -34,6 +37,7 @@ export interface SecantMethodResponse {
   erro: number;
   motivoParada: string;
   passos: SecanteMethodStep[];
+  metodo: string;
 }
 export interface BissectionMethodStep {
   iteracao: number;
@@ -41,8 +45,8 @@ export interface BissectionMethodStep {
     a: number;
     b: number;
   };
-  pontoMedio: number;
-  valorFuncao: number;
+  xAprox: number;
+  fxAprox: number;
   erro: number;
   descricao: string;
 }
@@ -52,28 +56,31 @@ export interface FalsePositionMethodStep {
     a: number;
     b: number;
   };
-  pontoFalsaPosicao: number;
-  valorFuncao: number;
+  xAprox: number;
+  fxAprox: number;
   erro: number;
   descricao: string;
 }
 export interface NewtonRaphsonStep {
-  iteracao: number;
-  xAtual: number;
-  valorFuncao: number;
   derivada: string;
-  xNovo: number;
-  erro: number;
+  descricao: string;
+  fxAprox: number;
+  fxAtual: number;
+  iteracao: number;
+  xAprox: number;
+  xAtual: number;
 }
 export interface SecanteMethodStep {
   erro: number;
-  fXCurr: number;
-  fXPrev: number;
+  fa: number;
+  fb: number;
+  xAprox: number;
   iteracao: number;
-  xCurr: number;
-  xNext: number;
-  xPrev: number;
+  a: number;
+  b: number;
+  fxAprox: number;
 }
 export interface ErrorResponse {
   error: string;
+  metodo: string;
 }

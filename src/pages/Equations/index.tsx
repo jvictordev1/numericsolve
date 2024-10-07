@@ -6,10 +6,9 @@ import {
   NewtonRaphsonResponse,
   SecantMethodResponse,
 } from "@/common";
-import Chart from "@/components/Chart";
-import IterationsHandler from "@/components/IterationsHandler";
 import Loader from "@/components/Loader";
 import MethodsInterval from "@/components/MethodsInterval";
+import ResultHandler from "@/components/ResultHandler";
 import {
   Accordion,
   AccordionContent,
@@ -26,7 +25,6 @@ import {
 } from "@/components/ui/select";
 import { Bot, CircleX } from "lucide-react";
 import { useState } from "react";
-import { InlineMath } from "react-katex";
 
 export default function Equations() {
   const [equation, setEquation] = useState("");
@@ -35,19 +33,18 @@ export default function Equations() {
   const [firstIntervalNumber, setFirstIntervalNumber] = useState(0);
   const [secondIntervalNumber, setSecondIntervalNumber] = useState(0);
   const [iterations, setIterations] = useState(0);
-  const [result, setResult] = useState<
-    | BissectionMethodResponse
-    | FalsePositionMethodResponse
-    | NewtonRaphsonResponse
-    | SecantMethodResponse
-    | ErrorResponse
-    | null
-  >(null);
+  const [secondIterations, setSecondIterations] = useState(0);
+  const [results, setResults] = useState<
+    Array<
+      | BissectionMethodResponse
+      | FalsePositionMethodResponse
+      | NewtonRaphsonResponse
+      | SecantMethodResponse
+    >
+  >([]);
+  const [error, setError] = useState<ErrorResponse>();
   const [isLoaderOn, setIsLoaderOn] = useState(false);
-  const [methodData, setMethodData] = useState("");
   const [secondMethod, setSecondMethod] = useState("");
-  const [lastStepFirstNumber, setLastStepFirstNumber] = useState(0);
-  const [lastStepSecondNumber, setLastStepSecondNumber] = useState(0);
 
   const methods = [
     {
@@ -77,58 +74,37 @@ export default function Equations() {
       maxIteracao: iterations,
     };
     let data;
-    if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
+    if (
+      selectedMethod === "bisseccao" ||
+      selectedMethod === "fp" ||
+      selectedMethod === "secante"
+    ) {
       data = {
         ...template,
         intervalo: [firstIntervalNumber, secondIntervalNumber],
       };
-      if (selectedMethod === "bisseccao") {
-        setMethodData("pontoMedio");
-      } else {
-        setMethodData("pontoFalsaPosicao");
-      }
     } else {
-      if (selectedMethod === "newtonRaphson") {
-        data = {
-          ...template,
-          chuteInicial: firstIntervalNumber,
-        };
-        setMethodData("xAtual");
-      } else {
-        data = {
-          ...template,
-          x0: firstIntervalNumber,
-          x1: secondIntervalNumber,
-        };
-        setMethodData("xCurr");
-      }
+      data = {
+        ...template,
+        chuteInicial: firstIntervalNumber,
+      };
     }
     numericSolveApi
       .post(`/${selectedMethod}`, data)
       .then((res) => {
         const r = res.data.resultado;
-        // const steps = r.resultado.passos;
+        const data = {
+          ...r,
+          metodo: selectedMethod,
+        };
         if ("error" in r) {
-          setResult(r);
+          setError(r);
           return;
         }
-        if (selectedMethod === "secante") {
-          setResult(r);
-          // setLastStepFirstNumber(steps[steps.length - 1].xPrev);
-          // setLastStepSecondNumber(steps[steps.length - 1].xCurr);
-          return;
-        } //else {
-        //   if (selectedMethod === "bisseccao" || selectedMethod === "fp") {
-        //     setLastStepFirstNumber(steps[steps.length - 1].intervaloAtual.a);
-        //     setLastStepSecondNumber(steps[steps.length - 1].intervaloAtual.b);
-        //   } else {
-        //     setLastStepFirstNumber(steps[steps.length - 1].xAtual);
-        //   }
-        // }
-        setResult(r.resultado);
+        setResults([data]);
       })
       .catch((err) => {
-        setResult(err.response.data);
+        console.log(err);
       })
       .finally(() => {
         setIsLoaderOn(false);
@@ -136,16 +112,29 @@ export default function Equations() {
   }
   function handleContinueSolution(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoaderOn(true);
     numericSolveApi
       .post("/continuarSolucao", {
-        metodoEscolhido: "newtonRaphson",
-        novasIteracoes: 1,
+        metodoEscolhido: secondMethod,
+        novasIteracoes: secondIterations,
       })
       .then((res) => {
-        console.log(res);
+        const r = res.data.novoResultado.resultado;
+        const data = {
+          ...r,
+          metodo: secondMethod,
+        };
+        if ("error" in r) {
+          setError(r);
+          return;
+        }
+        setResults((prev) => [...prev, data]);
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        setIsLoaderOn(false);
       });
   }
 
@@ -172,7 +161,7 @@ export default function Equations() {
               value={equation}
               placeholder="Equação: x² + 3x + 2"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={result ? true : false}
+              disabled={results.length ? true : false}
             />
             <Input
               required
@@ -185,13 +174,13 @@ export default function Equations() {
               step="0.000001"
               placeholder="Tolerância"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={result ? true : false}
+              disabled={results.length ? true : false}
             />
             <Select
               required
               onValueChange={(val) => setSelectedMethod(val)}
               value={selectedMethod}
-              disabled={result ? true : false}
+              disabled={results.length ? true : false}
             >
               <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
                 <SelectValue placeholder="Método" />
@@ -208,7 +197,7 @@ export default function Equations() {
             </Select>
             <MethodsInterval
               selectedMethod={selectedMethod}
-              result={result ? true : false}
+              result={results.length ? true : false}
               setFirstIntervalNumber={(n: number) => setFirstIntervalNumber(n)}
               setSecondIntervalNumber={(n: number) =>
                 setSecondIntervalNumber(n)
@@ -220,21 +209,21 @@ export default function Equations() {
               name="iterations"
               id="iterations"
               onChange={(e) => setIterations(Number(e.target.value))}
-              min="10"
+              min="2"
               max="1000"
               placeholder="Máximo de iterações"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={result ? true : false}
+              disabled={results.length ? true : false}
             />
             <button
               className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
               type="submit"
-              disabled={result ? true : false}
+              disabled={results.length ? true : false}
             >
               Resolver!
             </button>
           </form>
-          {result && (
+          {results.length !== 0 && (
             <section className="flex flex-col border p-4 rounded-sm w-full gap-4 sm:w-[600px] md:w-[700px] lg:w-[800px]">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl">Resultado</h1>
@@ -245,151 +234,95 @@ export default function Equations() {
                   <button type="button" title="Apagar resultado">
                     <CircleX
                       className="text-red-500 text-2xl"
-                      onClick={() => setResult(null)}
+                      onClick={() => {
+                        setResults([]);
+                      }}
                     />
                   </button>
                 </div>
               </div>
-              {"error" in result ? (
-                <h2 className="font-semibold text-red-500">
-                  Erro: {result.error}
-                </h2>
+              {results.map((r, index) => {
+                return error ? (
+                  <h2 className="font-semibold text-red-500">
+                    Erro: {error.error}
+                  </h2>
+                ) : (
+                  <ResultHandler
+                    key={index}
+                    equation={equation}
+                    firstIntervalNumber={firstIntervalNumber}
+                    secondIntervalNumber={
+                      secondIntervalNumber && secondIntervalNumber
+                    }
+                    result={r}
+                    tolerance={tolerance}
+                    selectedMethod={r.metodo}
+                    index={index}
+                  />
+                );
+              })}
+              {results[results.length - 1].convergiu ? (
+                ""
               ) : (
-                <>
-                  <div>
-                    <p>
-                      Calcular <InlineMath math={equation} /> com Erro ={" "}
-                      <InlineMath math={String(tolerance)} /> e{" "}
-                      {selectedMethod === "bisseccao" ||
-                      selectedMethod === "fp" ? (
-                        <InlineMath
-                          math={`Intervalo [${firstIntervalNumber}, ${secondIntervalNumber}]`}
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="text-xl">
+                      Continuar por outro método?
+                    </AccordionTrigger>
+                    <AccordionContent className="flex justify-center bg-zinc-100">
+                      <form
+                        className="flex flex-col w-full gap-4"
+                        onSubmit={(e) => handleContinueSolution(e)}
+                      >
+                        <Select
+                          onValueChange={(val) => setSecondMethod(val)}
+                          required
+                        >
+                          <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
+                            <SelectValue placeholder="Método" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {methods.map((m) => {
+                              return (
+                                <SelectItem
+                                  key={m.value}
+                                  value={m.value}
+                                  disabled={
+                                    m.value ===
+                                    results[results.length - 1].metodo
+                                      ? true
+                                      : false
+                                  }
+                                >
+                                  {m.name}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          required
+                          type="number"
+                          name="iterations"
+                          id="iterations"
+                          min="2"
+                          max="1000"
+                          placeholder="Máximo de iterações"
+                          className="border-2 border-zinc-300 focus:border-zinc-900"
+                          onChange={(e) =>
+                            setSecondIterations(Number(e.target.value))
+                          }
                         />
-                      ) : selectedMethod === "newtonRaphson" ? (
-                        <InlineMath math={`x_0 = ${firstIntervalNumber}`} />
-                      ) : (
-                        <InlineMath
-                          math={`[x_0 = ${firstIntervalNumber};x_1 = ${secondIntervalNumber}]`}
-                        />
-                      )}{" "}
-                      Utilizando o método da{" "}
-                      {methods.find((m) => m.value === selectedMethod)?.name}.
-                    </p>
-                    {"derivada" in result ? (
-                      <p>
-                        Derivada: <InlineMath math={result.derivada} />
-                      </p>
-                    ) : null}
-                  </div>
-                  <p>
-                    Função
-                    {result.convergiu ? " convergiu" : " não convergiu"} com
-                    erro de{" "}
-                    <InlineMath
-                      math={`\\epsilon = ${result.erro.toFixed(6)}`}
-                    />{" "}
-                    através de <InlineMath math={`${result.iteracoes}`} />{" "}
-                    iterações
-                    {result.convergiu ? (
-                      <span>
-                        , com raiz{" "}
-                        <InlineMath
-                          math={`\\overline{x} = ${result.raiz.toFixed(6)}`}
-                        />
-                      </span>
-                    ) : (
-                      ""
-                    )}
-                    .
-                  </p>
-                  <hr />
-                  <section>
-                    <IterationsHandler
-                      method={selectedMethod}
-                      steps={result.passos}
-                    />
-                  </section>
-                  <h4 className="text-xl font-medium">
-                    Comportamento do método
-                  </h4>
-                  <section className="w-full h-72">
-                    <Chart
-                      methodData={methodData}
-                      selectedMethod={selectedMethod}
-                      steps={result.passos}
-                    />
-                  </section>
-                  {result.convergiu ? (
-                    ""
-                  ) : (
-                    <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="item-1">
-                        <AccordionTrigger className="text-xl">
-                          Continuar por outro método?
-                        </AccordionTrigger>
-                        <AccordionContent className="flex justify-center bg-zinc-100">
-                          <form
-                            className="flex flex-col w-full gap-4"
-                            onSubmit={(e) => handleContinueSolution(e)}
-                          >
-                            <Select
-                              onValueChange={(val) => setSecondMethod(val)}
-                              required
-                            >
-                              <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
-                                <SelectValue placeholder="Método" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {methods.map((m) => {
-                                  return (
-                                    <SelectItem
-                                      key={m.value}
-                                      value={m.value}
-                                      disabled={
-                                        m.value === selectedMethod
-                                          ? true
-                                          : false
-                                      }
-                                    >
-                                      {m.name}
-                                    </SelectItem>
-                                  );
-                                })}
-                              </SelectContent>
-                            </Select>
-                            <MethodsInterval
-                              selectedMethod={secondMethod}
-                              setFirstIntervalNumber={(n: number) =>
-                                setLastStepFirstNumber(n)
-                              }
-                              setSecondIntervalNumber={(n: number) =>
-                                setLastStepSecondNumber(n)
-                              }
-                              firstIntervalNumber={lastStepFirstNumber}
-                              secondIntervalNumber={lastStepSecondNumber}
-                            />
-                            <Input
-                              required
-                              type="number"
-                              name="iterations"
-                              id="iterations"
-                              min="10"
-                              max="1000"
-                              placeholder="Máximo de iterações"
-                              className="border-2 border-zinc-300 focus:border-zinc-900"
-                            />
-                            <button
-                              className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
-                              type="submit"
-                            >
-                              Continuar
-                            </button>
-                          </form>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  )}
-                </>
+                        <button
+                          className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
+                          type="submit"
+                        >
+                          Continuar
+                        </button>
+                      </form>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               )}
             </section>
           )}

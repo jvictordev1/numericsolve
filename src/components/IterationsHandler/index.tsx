@@ -44,16 +44,16 @@ export default function IterationsHandler({
             (step as BissectionMethodStep).intervaloAtual.a
           )} + ${numFormat(
               (step as BissectionMethodStep).intervaloAtual.b
-            )}}{2} = ${(step as BissectionMethodStep).pontoMedio.toFixed(6)}
+            )}}{2} = ${numFormat((step as BissectionMethodStep).xAprox)}
       `}
             formulaValorFuncao={`
       f(\\overline{x}) = f(${numFormat(
-        (step as BissectionMethodStep).pontoMedio
-      )}) = ${numFormat((step as BissectionMethodStep).valorFuncao)}
+        (step as BissectionMethodStep).xAprox
+      )}) = ${numFormat((step as BissectionMethodStep).fxAprox)}
     `}
             formulaErro={`
     \\epsilon = \\ |f(${numFormat(
-      (step as BissectionMethodStep).pontoMedio
+      (step as BissectionMethodStep).xAprox
     )})| = ${numFormat((step as BissectionMethodStep).erro)}
   `}
           />
@@ -75,18 +75,16 @@ export default function IterationsHandler({
               (step as FalsePositionMethodStep).intervaloAtual.b
             )})-f(${numFormat(
               (step as FalsePositionMethodStep).intervaloAtual.a
-            )})} = ${numFormat(
-              (step as FalsePositionMethodStep).pontoFalsaPosicao
-            )}
+            )})} = ${numFormat((step as FalsePositionMethodStep).xAprox)}
 `}
             formulaValorFuncao={`
 f(\\overline{x}) = f(${numFormat(
-              (step as FalsePositionMethodStep).pontoFalsaPosicao
-            )}) = ${numFormat((step as FalsePositionMethodStep).valorFuncao)}
+              (step as FalsePositionMethodStep).xAprox
+            )}) = ${numFormat((step as FalsePositionMethodStep).fxAprox)}
 `}
             formulaErro={`
 \\epsilon = \\ |f(${numFormat(
-              (step as FalsePositionMethodStep).pontoFalsaPosicao
+              (step as FalsePositionMethodStep).xAprox
             )})| = ${numFormat((step as FalsePositionMethodStep).erro)}
 `}
             iteracao={step.iteracao}
@@ -103,17 +101,17 @@ f(\\overline{x}) = f(${numFormat(
               (step as NewtonRaphsonStep).xAtual
             )})}{f'(${numFormat(
               (step as NewtonRaphsonStep).xAtual
-            )})} = ${numFormat((step as NewtonRaphsonStep).xNovo)}
+            )})} = ${numFormat((step as NewtonRaphsonStep).xAprox)}
         `}
             formulaValorFuncao={`
   f(\\overline{x}) = f(${numFormat(
-    (step as NewtonRaphsonStep).xNovo
-  )}) = ${numFormat((step as NewtonRaphsonStep).valorFuncao)}
+    (step as NewtonRaphsonStep).xAprox
+  )}) = ${numFormat((step as NewtonRaphsonStep).fxAprox)}
 `}
             formulaErro={`
   \\epsilon = \\ |f(${numFormat(
-    (step as NewtonRaphsonStep).xNovo
-  )})| = ${numFormat((step as NewtonRaphsonStep).erro)}
+    (step as NewtonRaphsonStep).xAprox
+  )})| = ${numFormat((step as NewtonRaphsonStep).fxAprox)}
 `}
             iteracao={step.iteracao}
           />
@@ -124,25 +122,23 @@ f(\\overline{x}) = f(${numFormat(
             key={key}
             formulaPonto={`
         \\overline{x} = \\frac{[${numFormat(
-          (step as SecanteMethodStep).xPrev
-        )}*f(${numFormat((step as SecanteMethodStep).xCurr)}) - ${(
-              step as SecanteMethodStep
-            ).xCurr.toFixed(4)}*f(${numFormat(
-              (step as SecanteMethodStep).xPrev
-            )})]}{f(${numFormat(
-              (step as SecanteMethodStep).xCurr
-            )})-f(${numFormat(
-              (step as SecanteMethodStep).xPrev
-            )})} = ${numFormat((step as SecanteMethodStep).xNext)}
+          (step as SecanteMethodStep).a
+        )}*f(${numFormat((step as SecanteMethodStep).b)}) - ${numFormat(
+              (step as SecanteMethodStep).b
+            )}*f(${numFormat((step as SecanteMethodStep).b)})]}{f(${numFormat(
+              (step as SecanteMethodStep).a
+            )})-f(${numFormat((step as SecanteMethodStep).a)})} = ${numFormat(
+              (step as SecanteMethodStep).xAprox
+            )}
     `}
             formulaValorFuncao={`
   f(\\overline{x}) = f(${numFormat(
-    (step as SecanteMethodStep).xNext
-  )}) = ${numFormat((step as SecanteMethodStep).fXCurr)}
+    (step as SecanteMethodStep).xAprox
+  )}) = ${numFormat((step as SecanteMethodStep).fxAprox)}
 `}
             formulaErro={`
   \\epsilon = \\ |f(${numFormat(
-    (step as SecanteMethodStep).xNext
+    (step as SecanteMethodStep).xAprox
   )})| = ${numFormat((step as SecanteMethodStep).erro)}`}
             iteracao={step.iteracao}
           />

@@ -16,20 +16,14 @@ import {
 } from "recharts";
 
 interface ChartProps {
-  selectedMethod: string;
   steps:
     | BissectionMethodStep[]
     | FalsePositionMethodStep[]
     | NewtonRaphsonStep[]
     | SecanteMethodStep[];
-  methodData: string;
 }
 
-export default function Chart({
-  selectedMethod,
-  steps,
-  methodData,
-}: ChartProps) {
+export default function Chart({ steps }: ChartProps) {
   return (
     <ResponsiveContainer width="100%" height="80%">
       <LineChart
@@ -43,15 +37,13 @@ export default function Chart({
         className="-ml-4"
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey={methodData} />
-        <YAxis
-          dataKey={selectedMethod === "secante" ? "fXCurr" : "valorFuncao"}
-        />
+        <XAxis dataKey="xAprox" />
+        <YAxis dataKey="fxAprox" />
         <Tooltip />
         <Legend />
         <Line
           type="monotone"
-          dataKey={selectedMethod === "secante" ? "fXCurr" : "valorFuncao"}
+          dataKey="fxAprox"
           stroke="#8884d8"
           activeDot={{ r: 8 }}
           name="Valor de f(x)"
