@@ -42,7 +42,7 @@ export default function Equations() {
       | SecantMethodResponse
     >
   >([]);
-  const [error, setError] = useState<ErrorResponse>();
+  const [error, setError] = useState<ErrorResponse | null>();
   const [isLoaderOn, setIsLoaderOn] = useState(false);
   const [secondMethod, setSecondMethod] = useState("");
 
@@ -97,13 +97,13 @@ export default function Equations() {
           ...r,
           metodo: selectedMethod,
         };
-        if ("error" in r) {
-          setError(r);
-          return;
-        }
         setResults([data]);
       })
       .catch((err) => {
+        if (err.response && err.response.status === 400) {
+          setError(err.response.data);
+          return;
+        }
         console.log(err);
       })
       .finally(() => {
@@ -115,7 +115,7 @@ export default function Equations() {
     setIsLoaderOn(true);
     numericSolveApi
       .post("/continuarSolucao", {
-        metodoEscolhido: secondMethod,
+        metodoEscolhido: secondMethod === "fp" ? "falsaPosicao" : secondMethod,
         novasIteracoes: secondIterations,
       })
       .then((res) => {
@@ -161,7 +161,7 @@ export default function Equations() {
               value={equation}
               placeholder="Equação: x² + 3x + 2"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={results.length ? true : false}
+              disabled={results.length || error ? true : false}
             />
             <Input
               required
@@ -174,13 +174,13 @@ export default function Equations() {
               step="0.000001"
               placeholder="Tolerância"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={results.length ? true : false}
+              disabled={results.length || error ? true : false}
             />
             <Select
               required
               onValueChange={(val) => setSelectedMethod(val)}
               value={selectedMethod}
-              disabled={results.length ? true : false}
+              disabled={results.length || error ? true : false}
             >
               <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
                 <SelectValue placeholder="Método" />
@@ -213,17 +213,17 @@ export default function Equations() {
               max="1000"
               placeholder="Máximo de iterações"
               className="border-2 border-zinc-300 focus:border-zinc-900"
-              disabled={results.length ? true : false}
+              disabled={results.length || error ? true : false}
             />
             <button
               className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
               type="submit"
-              disabled={results.length ? true : false}
+              disabled={results.length || error ? true : false}
             >
               Resolver!
             </button>
           </form>
-          {results.length !== 0 && (
+          {(results.length !== 0 || error) && (
             <section className="flex flex-col border p-4 rounded-sm w-full gap-4 sm:w-[600px] md:w-[700px] lg:w-[800px]">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl">Resultado</h1>
@@ -236,93 +236,96 @@ export default function Equations() {
                       className="text-red-500 text-2xl"
                       onClick={() => {
                         setResults([]);
+                        setError(null);
                       }}
                     />
                   </button>
                 </div>
               </div>
-              {results.map((r, index) => {
-                return error ? (
-                  <h2 className="font-semibold text-red-500">
-                    Erro: {error.error}
-                  </h2>
-                ) : (
-                  <ResultHandler
-                    key={index}
-                    equation={equation}
-                    firstIntervalNumber={firstIntervalNumber}
-                    secondIntervalNumber={
-                      secondIntervalNumber && secondIntervalNumber
-                    }
-                    result={r}
-                    tolerance={tolerance}
-                    selectedMethod={r.metodo}
-                    index={index}
-                  />
-                );
-              })}
-              {results[results.length - 1].convergiu ? (
-                ""
+              {error ? (
+                <h2 className="font-semibold text-red-500">
+                  Erro: {error.error}
+                </h2>
               ) : (
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger className="text-xl">
-                      Continuar por outro método?
-                    </AccordionTrigger>
-                    <AccordionContent className="flex justify-center bg-zinc-100">
-                      <form
-                        className="flex flex-col w-full gap-4"
-                        onSubmit={(e) => handleContinueSolution(e)}
-                      >
-                        <Select
-                          onValueChange={(val) => setSecondMethod(val)}
-                          required
-                        >
-                          <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
-                            <SelectValue placeholder="Método" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {methods.map((m) => {
-                              return (
-                                <SelectItem
-                                  key={m.value}
-                                  value={m.value}
-                                  disabled={
-                                    m.value ===
-                                    results[results.length - 1].metodo
-                                      ? true
-                                      : false
-                                  }
-                                >
-                                  {m.name}
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        <Input
-                          required
-                          type="number"
-                          name="iterations"
-                          id="iterations"
-                          min="2"
-                          max="1000"
-                          placeholder="Máximo de iterações"
-                          className="border-2 border-zinc-300 focus:border-zinc-900"
-                          onChange={(e) =>
-                            setSecondIterations(Number(e.target.value))
-                          }
-                        />
-                        <button
-                          className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
-                          type="submit"
-                        >
-                          Continuar
-                        </button>
-                      </form>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <>
+                  {results.map((r, index) => (
+                    <ResultHandler
+                      key={index}
+                      equation={equation}
+                      firstIntervalNumber={firstIntervalNumber}
+                      secondIntervalNumber={
+                        secondIntervalNumber && secondIntervalNumber
+                      }
+                      result={r}
+                      tolerance={tolerance}
+                      selectedMethod={r.metodo}
+                      index={index}
+                    />
+                  ))}
+                  {results[results.length - 1].convergiu ? (
+                    ""
+                  ) : (
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="item-1">
+                        <AccordionTrigger className="text-xl">
+                          Continuar por outro método?
+                        </AccordionTrigger>
+                        <AccordionContent className="flex justify-center bg-zinc-100">
+                          <form
+                            className="flex flex-col w-full gap-4"
+                            onSubmit={(e) => handleContinueSolution(e)}
+                          >
+                            <Select
+                              onValueChange={(val) => setSecondMethod(val)}
+                              required
+                            >
+                              <SelectTrigger className="shadow-none border-2 border-zinc-300 focus:border-zinc-900">
+                                <SelectValue placeholder="Método" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {methods.map((m) => {
+                                  return (
+                                    <SelectItem
+                                      key={m.value}
+                                      value={m.value}
+                                      disabled={
+                                        m.value ===
+                                        results[results.length - 1].metodo
+                                          ? true
+                                          : false
+                                      }
+                                    >
+                                      {m.name}
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              required
+                              type="number"
+                              name="iterations"
+                              id="iterations"
+                              min="2"
+                              max="1000"
+                              placeholder="Máximo de iterações"
+                              className="border-2 border-zinc-300 focus:border-zinc-900"
+                              onChange={(e) =>
+                                setSecondIterations(Number(e.target.value))
+                              }
+                            />
+                            <button
+                              className="bg-green-500 rounded-md text-zinc-100 text-xl py-2 disabled:bg-zinc-500"
+                              type="submit"
+                            >
+                              Continuar
+                            </button>
+                          </form>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  )}
+                </>
               )}
             </section>
           )}

@@ -82,5 +82,4 @@ export interface SecanteMethodStep {
 }
 export interface ErrorResponse {
   error: string;
-  metodo: string;
 }
