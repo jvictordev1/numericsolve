@@ -100,11 +100,7 @@ export default function Equations() {
         setResults([data]);
       })
       .catch((err) => {
-        if (err.response && err.response.status === 400) {
-          setError(err.response.data);
-          return;
-        }
-        console.log(err);
+        setError(err.response.data);
       })
       .finally(() => {
         setIsLoaderOn(false);
@@ -131,7 +127,7 @@ export default function Equations() {
         setResults((prev) => [...prev, data]);
       })
       .catch((err) => {
-        console.log(err);
+        setError(err.response.data);
       })
       .finally(() => {
         setIsLoaderOn(false);
