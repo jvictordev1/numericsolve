@@ -125,7 +125,7 @@ f(\\overline{x}) = f(${numFormat(
           (step as SecanteMethodStep).a
         )}*f(${numFormat((step as SecanteMethodStep).b)}) - ${numFormat(
               (step as SecanteMethodStep).b
-            )}*f(${numFormat((step as SecanteMethodStep).b)})]}{f(${numFormat(
+            )}*f(${numFormat((step as SecanteMethodStep).a)})]}{f(${numFormat(
               (step as SecanteMethodStep).b
             )})-f(${numFormat((step as SecanteMethodStep).a)})} = ${numFormat(
               (step as SecanteMethodStep).xAprox
